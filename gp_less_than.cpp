@@ -43,16 +43,34 @@ bool greater_than( int v1, int v2)
 	return (v1 > v2) ? true : false;
 }
 
-vector<int> filter(const vector<int> &vec, int filter_value, bool (*pred)(int, int))
+template <typename InputIterator, typename OutputIterator, 
+	typename ElemType, typename Comp>
+OutputIterator
+filter(InputIterator first, InputIterator last,OutputIterator at,const ElemType &val,
+		Comp pred)
+{
+	while((first =
+				find_if(first,last,
+					bind2nd(pred,val))) != last)
+	{
+		cout<<"found value: "<<*first<<endl;
+		*at++ = *first++;
+	}
+	return at;
+}
+
+vector<int> filter_adapter(const vector<int> &vec, int val, less<int> lt)
 {
 	vector<int> nvec;
-	for(int ix = 0; ix < vec.size(); ix++)
+	vector<int> :: const_iterator iter = vec.begin();
+	while( ( iter = find_if(iter,vec.end(), bind2nd(lt , val))) != vec.end())
 	{
-		if(pred(vec[ix], filter_value))
-			nvec.push_back(vec[ix]);
+		nvec.push_back(*iter);
+		iter++;
 	}
 	return nvec;
 }
+
 
 int count_occurs(const vector<int> &vec, int val)
 {
@@ -96,5 +114,12 @@ int main()
 	vector<int> transform_vec(test_vec.size());
 	transform(test_vec.begin(),test_vec.end(),test_vec1.begin(),transform_vec.begin(),plus<int> ());
 	display(transform_vec);
+
+	cout<<"filter:\n";
+	vector<int> filter_vec(test_vec.size());
+	//filter_vec = filter_adapter(test_vec, 20,less<int>());
+	//display(filter_vec);
+	filter(test_vec.begin(),test_vec.end(),filter_vec.begin(),35,less<int>());
+	
 	return 0;
 }
